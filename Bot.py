@@ -45,11 +45,14 @@ def send_welcome(message):
     )
     bot.reply_to(message, menu_text, parse_mode="Markdown")
 
-# FITUR 1: CEK SALDO
+# FITUR 1: CEK SALDO (DIAGNOSA)
 @bot.message_handler(commands=['saldo'])
 def check_balance(message):
     params = {'api_key': SMS_HERO_API_KEY, 'action': 'getBalance'}
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+    }
     try:
         response = requests.get(BASE_URL, params=params, headers=headers, timeout=10)
         res = response.text.strip()
@@ -58,11 +61,11 @@ def check_balance(message):
             balance = res.split(":")[1]
             bot.reply_to(message, f"💰 **Saldo Kamu:** ${balance}", parse_mode="Markdown")
         else:
-            # Memotong balasan maks 200 karakter agar Telegram tidak meluap/error
-            clean_res = res[:200] if len(res) > 200 else res
-            bot.reply_to(message, f"❌ Gagal cek saldo:\n`{clean_res}`", parse_mode="Markdown")
+            # Menampilkan Status Code & potongan respon
+            bot.reply_to(message, f"⚠️ Status Code: `{response.status_code}`\n\nRespon:\n`{res[:150]}`", parse_mode="Markdown")
     except Exception as e:
         bot.reply_to(message, f"⚠️ Error: {str(e)}")
+
 
 
 # FITUR 2: BELI NOMOR
