@@ -49,15 +49,21 @@ def send_welcome(message):
 @bot.message_handler(commands=['saldo'])
 def check_balance(message):
     params = {'api_key': SMS_HERO_API_KEY, 'action': 'getBalance'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     try:
-        res = requests.get(BASE_URL, params=params).text
+        response = requests.get(BASE_URL, params=params, headers=headers, timeout=10)
+        res = response.text.strip()
+        
         if "ACCESS_BALANCE" in res:
             balance = res.split(":")[1]
             bot.reply_to(message, f"💰 **Saldo Kamu:** ${balance}", parse_mode="Markdown")
         else:
-            bot.reply_to(message, f"❌ Gagal cek saldo: {res}")
+            # Memotong balasan maks 200 karakter agar Telegram tidak meluap/error
+            clean_res = res[:200] if len(res) > 200 else res
+            bot.reply_to(message, f"❌ Gagal cek saldo:\n`{clean_res}`", parse_mode="Markdown")
     except Exception as e:
         bot.reply_to(message, f"⚠️ Error: {str(e)}")
+
 
 # FITUR 2: BELI NOMOR
 @bot.message_handler(commands=['beli'])
