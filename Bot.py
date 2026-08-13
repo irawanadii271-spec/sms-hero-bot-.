@@ -69,7 +69,7 @@ def check_balance(message):
 
 
 
-# FITUR 2: BELI NOMOR
+NOMOR
 @bot.message_handler(commands=['beli'])
 def buy_number_menu(message):
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -124,7 +124,7 @@ def check_otp(message):
     elif "STATUS_WAIT_CODE" in res:
         bot.reply_to(message, "⏳ OTP belum masuk, silakan tunggu beberapa saat lalu cek kembali.")
     else:
-        bot.reply_to(message, f"ℹ️ Status: {res}")
+        bot.reply_to(message, f"ℹ️ Status: {res
 
 # FITUR 4: SELESAI / BATAL
 @bot.message_handler(commands=['selesai', 'batal'])
