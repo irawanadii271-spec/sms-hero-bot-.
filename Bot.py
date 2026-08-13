@@ -27,7 +27,8 @@ threading.Thread(target=run_health_check_server, daemon=True).start()
 BOT_TOKEN = "8364363583:AAEPTVMwnpHDtwwZf-X4kTnBpqxgUBzOMDc"
 SMS_HERO_API_KEY = "582c0Aef7648ce44bf433bb9bA200545"
 
-BASE_URL = "https://sms-hero.com/stubs/handler_api.php"
+BASE_URL = "https://hero-sms.com/stubs/handler_api.php"
+
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
