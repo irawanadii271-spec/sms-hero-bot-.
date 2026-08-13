@@ -69,42 +69,57 @@ def check_balance(message):
 
 
 
-NOMOR
+# FITUR 2: BELI NOMOR
 @bot.message_handler(commands=['beli'])
 def buy_number_menu(message):
     markup = types.InlineKeyboardMarkup(row_width=2)
-    btn_wa = types.InlineKeyboardButton("💬 WhatsApp", callback_data="buy_wa")
-    btn_tg = types.InlineKeyboardButton("✈️ Telegram", callback_data="buy_tg")
-    btn_sp = types.InlineKeyboardButton("🛒 Shopee", callback_data="buy_sh")
-    btn_go = types.InlineKeyboardButton("🚗 Gojek", callback_data="buy_go")
-    markup.add(btn_wa, btn_tg, btn_sp, btn_go)
+    btn_wa = types.InlineKeyboardButton("💬 WhatsApp", callback_data="buy_wa_0")
+    btn_tg = types.InlineKeyboardButton("✈️ Telegram", callback_data="buy_tg_0")
+    btn_sp = types.InlineKeyboardButton("🛒 Shopee", callback_data="buy_sh_0")
+    btn_go = types.InlineKeyboardButton("🚗 Gojek", callback_data="buy_go_0")
+    btn_ub = types.InlineKeyboardButton("🚘 Uber (Jepang 🇯🇵)", callback_data="buy_ub_11")
+    
+    markup.add(btn_wa, btn_tg, btn_sp, btn_go, btn_ub)
 
     bot.send_message(message.chat.id, "📱 **Pilih Layanan:**", reply_markup=markup, parse_mode="Markdown")
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('buy_'))
 def process_buy(call):
-    service_code = call.data.split('_')[1]
+    # Format callback: buy_[service]_[country]
+    parts = call.data.split('_')
+    service_code = parts[1]
+    country_code = parts[2] if len(parts) > 2 else '0'
+    
     params = {
         'api_key': SMS_HERO_API_KEY,
         'action': 'getNumber',
         'service': service_code,
-        'country': '0'
+        'country': country_code
     }
-    res = requests.get(BASE_URL, params=params).text
-    if "ACCESS_NUMBER" in res:
-        _, order_id, number = res.split(":")
-        msg = (
-            f"✅ **Nomor Berhasil Dibeli!**\n\n"
-            f"🆔 **ID Order:** `{order_id}`\n"
-            f"📞 **Nomor:** `{number}`\n"
-            f"🛠 **Layanan:** {service_code.upper()}\n\n"
-            f"• Cek OTP: `/otp {order_id}`\n"
-            f"• Selesaikan: `/selesai {order_id}`\n"
-            f"• Batalkan: `/batal {order_id}`"
-        )
-        bot.send_message(call.message.chat.id, msg, parse_mode="Markdown")
-    else:
-        bot.send_message(call.message.chat.id, f"❌ Gagal membeli nomor: {res}")
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15'
+    }
+    
+    try:
+        res = requests.get(BASE_URL, params=params, headers=headers, timeout=10).text.strip()
+        if "ACCESS_NUMBER" in res:
+            _, order_id, number = res.split(":")
+            msg = (
+                f"✅ **Nomor Berhasil Dibeli!**\n\n"
+                f"🆔 **ID Order:** `{order_id}`\n"
+                f"📞 **Nomor:** `{number}`\n"
+                f"🛠 **Layanan:** {service_code.upper()} (Negara: {country_code})\n\n"
+                f"• Cek OTP: `/otp {order_id}`\n"
+                f"• Selesaikan: `/selesai {order_id}`\n"
+                f"• Batalkan: `/batal {order_id}`"
+            )
+            bot.send_message(call.message.chat.id, msg, parse_mode="Markdown")
+        else:
+            clean_res = res[:150] if len(res) > 150 else res
+            bot.send_message(call.message.chat.id, f"❌ Gagal membeli nomor:\n`{clean_res}`", parse_mode="Markdown")
+    except Exception as e:
+        bot.send_message(call.message.chat.id, f"⚠️ Error: {str(e)}")
+
 
 # FITUR 3: CEK OTP
 @bot.message_handler(commands=['otp'])
